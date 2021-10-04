@@ -28,7 +28,7 @@
     </appender>
 
     <!-- 日志输出级别 -->
-    <root level="TRACE">
+    <root level="INFO">
         <appender-ref ref="consoleLog"/>
         <appender-ref ref="fileLog"/>
     </root>

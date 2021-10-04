@@ -42,4 +42,10 @@ public class LicenseController {
         httpServletResponse.setStatus(HttpStatus.CREATED.value());
         return licneseService.save(license);
     }
+
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    @DeleteMapping("/{id}")
+    public void delete(@NotNull @PathVariable("id") Long id) throws Exception {
+        licneseService.delete(id);
+    }
 }

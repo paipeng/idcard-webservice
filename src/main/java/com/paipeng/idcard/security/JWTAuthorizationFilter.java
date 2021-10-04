@@ -63,6 +63,10 @@ public class JWTAuthorizationFilter extends OncePerRequestFilter {
             logger.error(e.getMessage());
             if (e.getMessage().equals("403")) {
                 response.setStatus(HttpServletResponse.SC_FORBIDDEN);
+                response.sendError(HttpServletResponse.SC_FORBIDDEN, e.getMessage());
+            } else if (e.getMessage().equals("404")) {
+                response.setStatus(HttpServletResponse.SC_NOT_FOUND);
+                response.sendError(HttpServletResponse.SC_NOT_FOUND, e.getMessage());
             }
         }
     }

@@ -39,4 +39,15 @@ public class LicneseService extends BaseService {
         }
 
     }
+
+    public void delete(Long id) throws Exception {
+        logger.info("delete: " + id);
+        License license = licenseRepository.findById(id).orElse(null);
+        if (license != null) {
+            licenseRepository.delete(license);
+        } else {
+            logger.error("license not found -> 404");
+            throw new Exception("404");
+        }
+    }
 }
