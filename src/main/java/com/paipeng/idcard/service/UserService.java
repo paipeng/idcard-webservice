@@ -35,10 +35,10 @@ public class UserService extends BaseService {
             //String encodedPassword = passwordEncoder.encode(user.getPassword());
             //logger.trace("encodedPassword: " + encodedPassword);
             User foundUser = userRepository.findByEmail(user.getEmail());
-            
+
             if (foundUser != null) {
                 PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
-                if(passwordEncoder.matches(user.getPassword(),foundUser.getPassword())) {
+                if (passwordEncoder.matches(user.getPassword(), foundUser.getPassword())) {
                     String token = getJWTToken(user.getEmail());
                     logger.info("token: " + token.length());
                     foundUser.setToken(token);
@@ -69,7 +69,7 @@ public class UserService extends BaseService {
                                 .map(GrantedAuthority::getAuthority)
                                 .collect(Collectors.toList()))
                 .setIssuedAt(new Date(System.currentTimeMillis()))
-                .setExpiration(new Date(System.currentTimeMillis() + 600000))
+                .setExpiration(new Date(System.currentTimeMillis() + 3600000))
                 .signWith(SignatureAlgorithm.HS512,
                         JWTAuthorizationFilter.SECRET).compact();
         return token;
