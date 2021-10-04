@@ -21,6 +21,7 @@ public class LicenseController {
 
     @GetMapping(value = "", produces = {"application/json;charset=UTF-8"})
     public List<License> getAll() {
+        logger.info("getAll");
         return licneseService.getLicenses();
     }
 }
