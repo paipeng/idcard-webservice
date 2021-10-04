@@ -48,4 +48,14 @@ public class LicenseController {
     public void delete(@NotNull @PathVariable("id") Long id) throws Exception {
         licneseService.delete(id);
     }
+
+    @PutMapping(value = "/{id}", produces = {"application/json;charset=UTF-8"})
+    public License update(@NotNull @PathVariable("id") Long id, @RequestBody License license, HttpServletResponse httpServletResponse) {
+        logger.info("update: " + id);
+        license = licneseService.update(id, license);
+        if (license == null) {
+            httpServletResponse.setStatus(HttpStatus.NOT_FOUND.value());
+        }
+        return license;
+    }
 }

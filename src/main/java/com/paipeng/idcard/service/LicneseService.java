@@ -50,4 +50,22 @@ public class LicneseService extends BaseService {
             throw new Exception("404");
         }
     }
+
+    public License update(Long id, License license) {
+        logger.info("update: " + id);
+        License localLicense = licenseRepository.findById(id).orElse(null);
+        if (license != null) {
+            // update
+            localLicense.setOwner(license.getOwner());
+            localLicense.setAppName(license.getAppName());
+            localLicense.setExpire(license.getExpire());
+            localLicense.setNanogrid(license.isNanogrid());
+
+            localLicense = licenseRepository.saveAndFlush(localLicense);
+            return localLicense;
+        } else {
+            logger.error("license not found -> 404");
+            return null;
+        }
+    }
 }
