@@ -61,6 +61,9 @@ public class LicneseService extends BaseService {
         logger.info("delete: " + id);
         License license = licenseRepository.findById(id).orElse(null);
         if (license != null) {
+            if (license.getFilePath() != null) {
+                throw new Exception("409");
+            }
             User currentUser = getUserFromSecurity();
             if (currentUser.getId() == license.getUser().getId()) {
                 licenseRepository.delete(license);
