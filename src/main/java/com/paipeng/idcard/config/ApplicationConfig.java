@@ -15,9 +15,11 @@ public class ApplicationConfig {
     @Value("${license.public.key.file}")
     private String licensePublicKeyFile;
 
-
     @Value("${license.output.filepath}")
     private String licenseOutputFilepath;
+    @Value("${security.jwt.secret}")
+    private String securityJwtSecret;
+
     @Bean
     public ResourceBundleMessageSource messageSource() {
 
@@ -38,5 +40,9 @@ public class ApplicationConfig {
 
     public String getLicenseOutputFilepath() {
         return licenseOutputFilepath;
+    }
+
+    public String getSecurityJwtSecret() {
+        return securityJwtSecret;
     }
 }

@@ -1,5 +1,6 @@
 package com.paipeng.idcard.service;
 
+import com.paipeng.idcard.config.ApplicationConfig;
 import com.paipeng.idcard.entity.User;
 import com.paipeng.idcard.repository.UserRepository;
 import com.paipeng.idcard.security.JWTAuthorizationFilter;
@@ -25,6 +26,9 @@ public class UserService extends BaseService {
     private final static Logger logger = LogManager.getLogger(UserService.class.getSimpleName());
     @Autowired
     private UserRepository userRepository;
+
+    @Autowired
+    private ApplicationConfig applicationConfig;
 
     public User login(User user) {
         logger.info("my login: " + user.getEmail());
@@ -71,7 +75,7 @@ public class UserService extends BaseService {
                 .setIssuedAt(new Date(System.currentTimeMillis()))
                 .setExpiration(new Date(System.currentTimeMillis() + 3600000))
                 .signWith(SignatureAlgorithm.HS512,
-                        JWTAuthorizationFilter.SECRET).compact();
+                        applicationConfig.getSecurityJwtSecret()).compact();
         return token;
     }
 

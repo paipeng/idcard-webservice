@@ -1,6 +1,7 @@
 package com.paipeng.idcard.security;
 
 
+import com.paipeng.idcard.config.ApplicationConfig;
 import com.paipeng.idcard.entity.User;
 import com.paipeng.idcard.repository.UserRepository;
 import io.jsonwebtoken.*;
@@ -24,10 +25,12 @@ import java.util.stream.Collectors;
 @Service
 public class JWTAuthorizationFilter extends OncePerRequestFilter {
     private final static Logger logger = LoggerFactory.getLogger(JWTAuthorizationFilter.class);
-    private final String HEADER = "Authorization";
-    private final String PREFIX = "Bearer ";
-    public static final String SECRET = "5161127a80ff47a1855176c345a1de39833b486ea3dd40629081ab0370a1632c87496492fb634c60a458182c69a7f0d0";
+    private final static String HEADER = "Authorization";
+    private final static String PREFIX = "Bearer ";
+    //public static final String SECRET = "";
 
+    @Autowired
+    private ApplicationConfig applicationConfig;
 
     @Autowired
     private UserRepository userRepository;
@@ -56,6 +59,7 @@ public class JWTAuthorizationFilter extends OncePerRequestFilter {
             }
             chain.doFilter(request, response);
         } catch (ExpiredJwtException | UnsupportedJwtException | MalformedJwtException e) {
+            logger.error(e.getMessage());
             response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
             ((HttpServletResponse) response).sendError(HttpServletResponse.SC_UNAUTHORIZED, e.getMessage());
             return;
@@ -75,7 +79,7 @@ public class JWTAuthorizationFilter extends OncePerRequestFilter {
         logger.trace("validateToken");
         if (user != null) {
             logger.trace("local SECRET: " + user.getToken());
-            Claims claims = Jwts.parser().setSigningKey(SECRET).parseClaimsJws(jwtToken).getBody();
+            Claims claims = Jwts.parser().setSigningKey(applicationConfig.getSecurityJwtSecret()).parseClaimsJws(jwtToken).getBody();
             if (claims != null) {
                 return claims;
             }
