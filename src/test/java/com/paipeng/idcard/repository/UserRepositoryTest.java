@@ -11,6 +11,8 @@ import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.test.annotation.Rollback;
 
+import java.util.UUID;
+
 import static org.junit.jupiter.api.Assertions.*;
 
 @DataJpaTest
@@ -49,5 +51,13 @@ class UserRepositoryTest {
         BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
         String encodedPassword = passwordEncoder.encode("123456");
         System.out.println("encodedPassword: " +encodedPassword);
+    }
+
+
+    @Test
+    void testUUID() {
+        UUID uuid = UUID.randomUUID();
+        System.out.println("uuid: " + uuid);
+        System.out.println("uuid: " + uuid.toString().length());
     }
 }

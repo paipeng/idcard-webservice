@@ -10,6 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.stereotype.Service;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import javax.servlet.FilterChain;
@@ -20,11 +21,12 @@ import java.io.IOException;
 import java.util.List;
 import java.util.stream.Collectors;
 
+@Service
 public class JWTAuthorizationFilter extends OncePerRequestFilter {
     private final static Logger logger = LoggerFactory.getLogger(JWTAuthorizationFilter.class);
     private final String HEADER = "Authorization";
     private final String PREFIX = "Bearer ";
-    //public static final String SECRET = "eyJhbGciOiJIUzUxMiJ9.eyJqdGkiOiJzb2Z0dGVrSldUIiwic3ViIjoidGVzdEBnbWFpbC5jb20iLCJhdXRob3JpdGllcyI6WyJST0xFX1VTRVIiXSwiaWF0IjoxNjMzMzIxODk5LCJleHAiOjE2MzMzMjI0OTl9.8R8yST-AL58Cb7m5GXIGMsaAhsVW_Nar-gcLJJc1AKueeqtfVuDSQKJuO5_IYYkg2-pGSBL7BYJbY6QYv-uR5w";
+    public static final String SECRET = "5161127a80ff47a1855176c345a1de39833b486ea3dd40629081ab0370a1632c87496492fb634c60a458182c69a7f0d0";
 
 
     @Autowired
@@ -37,7 +39,7 @@ public class JWTAuthorizationFilter extends OncePerRequestFilter {
             if (checkJWTToken(request, response)) {
                 logger.trace("jwt token found");
                 Claims claims = validateToken(request);
-                if (claims.get("authorities") != null) {
+                if (claims != null && claims.get("authorities") != null) {
                     setUpSpringAuthentication(claims);
                 } else {
                     SecurityContextHolder.clearContext();
@@ -61,9 +63,13 @@ public class JWTAuthorizationFilter extends OncePerRequestFilter {
         List<User> users = userRepository.findUsersWithToken();
         for (User user : users) {
             logger.trace("local SECRET: " + user.getToken());
-            Claims claims = Jwts.parser().setSigningKey(user.getToken().getBytes()).parseClaimsJws(jwtToken).getBody();
-            if (claims != null) {
-                return claims;
+            try {
+                Claims claims = Jwts.parser().setSigningKey(SECRET).parseClaimsJws(jwtToken).getBody();
+                if (claims != null) {
+                    return claims;
+                }
+            } catch (SignatureException e) {
+                logger.error(e.getMessage());
             }
         }
         return null;

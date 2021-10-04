@@ -14,6 +14,7 @@ import org.springframework.security.config.annotation.web.configuration.WebSecur
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.web.filter.OncePerRequestFilter;
 
 @Configuration
 @EnableWebSecurity
@@ -45,6 +46,10 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
         auth.authenticationProvider(authenticationProvider());
     }
 
+    @Bean
+    public JWTAuthorizationFilter getCustomOncePerRequestFilter(){
+        return new JWTAuthorizationFilter();
+    }
     @Override
     protected void configure(HttpSecurity http) throws Exception {
         /*
@@ -62,9 +67,9 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
          */
 
         http.csrf().disable()
-                .addFilterAfter(new JWTAuthorizationFilter(), UsernamePasswordAuthenticationFilter.class)
+                .addFilterAfter(getCustomOncePerRequestFilter(), UsernamePasswordAuthenticationFilter.class)
                 .authorizeRequests()
-                .antMatchers("/version", "/login").permitAll()
+                .antMatchers("/version", "/login", "/users", "/licenses").permitAll()
                 .anyRequest().authenticated();
     }
 

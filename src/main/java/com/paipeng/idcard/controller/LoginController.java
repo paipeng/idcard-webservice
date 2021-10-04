@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.security.SecureRandom;
 import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -60,6 +61,11 @@ public class LoginController {
 
     @SuppressWarnings("undeprecated")
     private String getJWTToken(String username) {
+        //SecureRandom random = new SecureRandom();
+        //byte[] bytes = new byte[64]; // 36 bytes * 8 = 288 bits, a little bit more than
+        // the 256 required bits
+        //random.nextBytes(bytes);
+
         List<GrantedAuthority> grantedAuthorities = AuthorityUtils
                 .commaSeparatedStringToAuthorityList("ROLE_USER");
         String token = Jwts
@@ -73,7 +79,7 @@ public class LoginController {
                 .setIssuedAt(new Date(System.currentTimeMillis()))
                 .setExpiration(new Date(System.currentTimeMillis() + 600000))
                 .signWith(SignatureAlgorithm.HS512,
-                        JWTAuthorizationFilter.SECRET.getBytes()).compact();
+                        JWTAuthorizationFilter.SECRET).compact();
         return token;
     }
 }
