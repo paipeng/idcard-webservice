@@ -42,9 +42,11 @@ public class JWTAuthorizationFilter extends OncePerRequestFilter {
                 if (claims != null && claims.get("authorities") != null) {
                     setUpSpringAuthentication(claims);
                 } else {
+                    logger.error("validateToken failed");
                     SecurityContextHolder.clearContext();
                 }
             } else {
+                logger.error("checkJWTToken failed");
                 SecurityContextHolder.clearContext();
             }
             chain.doFilter(request, response);
@@ -60,16 +62,12 @@ public class JWTAuthorizationFilter extends OncePerRequestFilter {
         String jwtToken = request.getHeader(HEADER).replace(PREFIX, "");
         logger.trace("jwtToken: " + jwtToken);
 
-        List<User> users = userRepository.findUsersWithToken();
-        for (User user : users) {
+        User user = userRepository.findByToken(jwtToken);
+        if (user != null) {
             logger.trace("local SECRET: " + user.getToken());
-            try {
-                Claims claims = Jwts.parser().setSigningKey(SECRET).parseClaimsJws(jwtToken).getBody();
-                if (claims != null) {
-                    return claims;
-                }
-            } catch (SignatureException e) {
-                logger.error(e.getMessage());
+            Claims claims = Jwts.parser().setSigningKey(SECRET).parseClaimsJws(jwtToken).getBody();
+            if (claims != null) {
+                return claims;
             }
         }
         return null;

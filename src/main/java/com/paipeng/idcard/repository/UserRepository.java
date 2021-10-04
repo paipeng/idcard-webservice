@@ -14,4 +14,6 @@ public interface UserRepository extends JpaRepository<User, Long> {
 
     @Query("SELECT u FROM User u WHERE u.token is not null")
     List<User> findUsersWithToken();
+
+    User findByToken(String token);
 }
