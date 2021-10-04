@@ -20,4 +20,9 @@ public class LicneseService {
         logger.info("getLicenses");
         return licenseRepository.findAll();
     }
+
+    public License getLicenseById(Long id) {
+        logger.info("getLicenseById");
+        return licenseRepository.findById(id).orElse(null);
+    }
 }
