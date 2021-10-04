@@ -29,7 +29,8 @@ public class LoginController {
 
     @PostMapping(value = "/login", produces = {"application/json;charset=UTF-8"})
     public String login(@NotNull @RequestBody User user) {
-        logger.trace("my login: " + user.getEmail());
+        logger.info("my login: " + user.getEmail());
+        logger.info("my password: " + user.getPassword());
 
         if (user.getPassword() != null) {
             //BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
