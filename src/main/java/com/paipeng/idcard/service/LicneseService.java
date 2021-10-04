@@ -114,16 +114,8 @@ public class LicneseService extends BaseService {
                 try {
                     license = LicenseUtil.getInstance().genLicense(license);
                     return licenseRepository.saveAndFlush(license);
-                } catch (NoSuchPaddingException e) {
-                    e.printStackTrace();
-                } catch (IllegalBlockSizeException e) {
-                    e.printStackTrace();
-                } catch (NoSuchAlgorithmException e) {
-                    e.printStackTrace();
-                } catch (BadPaddingException e) {
-                    e.printStackTrace();
-                } catch (InvalidKeyException e) {
-                    e.printStackTrace();
+                } catch (NoSuchPaddingException | IllegalBlockSizeException | NoSuchAlgorithmException | BadPaddingException | InvalidKeyException e) {
+                    logger.error(e.getMessage());
                 }
             } else {
                 logger.error("this licnese doesn't belong to this user");
