@@ -44,25 +44,35 @@ public class LicneseService extends BaseService {
         logger.info("delete: " + id);
         License license = licenseRepository.findById(id).orElse(null);
         if (license != null) {
-            licenseRepository.delete(license);
+            User currentUser = getUserFromSecurity();
+            if (currentUser.getId() == license.getUser().getId()) {
+                licenseRepository.delete(license);
+            } else {
+                throw new Exception("403");
+            }
         } else {
             logger.error("license not found -> 404");
             throw new Exception("404");
         }
     }
 
-    public License update(Long id, License license) {
+    public License update(Long id, License license) throws Exception {
         logger.info("update: " + id);
         License localLicense = licenseRepository.findById(id).orElse(null);
         if (license != null) {
-            // update
-            localLicense.setOwner(license.getOwner());
-            localLicense.setAppName(license.getAppName());
-            localLicense.setExpire(license.getExpire());
-            localLicense.setNanogrid(license.isNanogrid());
+            User currentUser = getUserFromSecurity();
+            if (currentUser.getId() == license.getUser().getId()) {
+                // update
+                localLicense.setOwner(license.getOwner());
+                localLicense.setAppName(license.getAppName());
+                localLicense.setExpire(license.getExpire());
+                localLicense.setNanogrid(license.isNanogrid());
 
-            localLicense = licenseRepository.saveAndFlush(localLicense);
-            return localLicense;
+                localLicense = licenseRepository.saveAndFlush(localLicense);
+                return localLicense;
+            } else {
+                throw new Exception("403");
+            }
         } else {
             logger.error("license not found -> 404");
             return null;

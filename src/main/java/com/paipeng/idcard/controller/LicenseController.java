@@ -50,7 +50,7 @@ public class LicenseController {
     }
 
     @PutMapping(value = "/{id}", produces = {"application/json;charset=UTF-8"})
-    public License update(@NotNull @PathVariable("id") Long id, @RequestBody License license, HttpServletResponse httpServletResponse) {
+    public License update(@NotNull @PathVariable("id") Long id, @RequestBody License license, HttpServletResponse httpServletResponse) throws Exception {
         logger.info("update: " + id);
         license = licneseService.update(id, license);
         if (license == null) {
