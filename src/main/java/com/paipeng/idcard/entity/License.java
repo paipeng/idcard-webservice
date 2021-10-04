@@ -33,7 +33,7 @@ public class License extends BaseEntity {
     private String uuid;
 
 
-    @Column(name = "signature", nullable = true, length = 128)
+    @Column(name = "signature", length = 512)
     private String signature;
 
 
