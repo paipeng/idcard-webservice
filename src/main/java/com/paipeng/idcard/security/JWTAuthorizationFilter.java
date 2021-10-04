@@ -59,18 +59,23 @@ public class JWTAuthorizationFilter extends OncePerRequestFilter {
             }
             chain.doFilter(request, response);
         } catch (ExpiredJwtException | UnsupportedJwtException | MalformedJwtException e) {
-            logger.error(e.getMessage());
+            logger.error("doFilterInternal exception: " + e.getMessage());
             response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
             ((HttpServletResponse) response).sendError(HttpServletResponse.SC_UNAUTHORIZED, e.getMessage());
             return;
         } catch (Exception e) {
-            logger.error(e.getMessage());
-            if (e.getMessage().equals("403")) {
+            logger.error("doFilterInternal exception2: " + e.getMessage());
+            if (e.getMessage().endsWith("java.lang.Exception: 403")) {
                 response.setStatus(HttpServletResponse.SC_FORBIDDEN);
                 response.sendError(HttpServletResponse.SC_FORBIDDEN, e.getMessage());
-            } else if (e.getMessage().equals("404")) {
+            } else if (e.getMessage().endsWith("java.lang.Exception: 404")) {
                 response.setStatus(HttpServletResponse.SC_NOT_FOUND);
                 response.sendError(HttpServletResponse.SC_NOT_FOUND, e.getMessage());
+            } else if (e.getMessage().endsWith("java.lang.Exception: 409")) {
+                response.setStatus(HttpServletResponse.SC_CONFLICT);
+                response.sendError(HttpServletResponse.SC_CONFLICT, e.getMessage());
+            } else {
+                logger.error("exception not handle");
             }
         }
     }
