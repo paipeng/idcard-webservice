@@ -15,6 +15,9 @@ public class ApplicationConfig {
     @Value("${license.public.key.file}")
     private String licensePublicKeyFile;
 
+
+    @Value("${license.output.filepath}")
+    private String licenseOutputFilepath;
     @Bean
     public ResourceBundleMessageSource messageSource() {
 
@@ -31,5 +34,9 @@ public class ApplicationConfig {
 
     public String getLicensePublicKeyFile() {
         return licensePublicKeyFile;
+    }
+
+    public String getLicenseOutputFilepath() {
+        return licenseOutputFilepath;
     }
 }

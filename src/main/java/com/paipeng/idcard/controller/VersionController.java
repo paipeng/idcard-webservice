@@ -1,7 +1,6 @@
 package com.paipeng.idcard.controller;
 
 import com.paipeng.idcard.config.ApplicationConfig;
-import com.paipeng.idcard.util.LicenseUtil;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,9 +22,6 @@ public class VersionController {
     public String version() {
         log.trace("version");
         //String token = getJWTToken("test@gmail.com");
-
-        LicenseUtil.getInstance().loadKeys(applicationConfig.getLicensePrivateKeyFile(), applicationConfig.getLicensePublicKeyFile());
-
         return "Hello IdCard CRM";
     }
 

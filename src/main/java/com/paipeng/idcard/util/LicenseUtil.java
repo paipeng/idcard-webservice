@@ -1,16 +1,23 @@
 package com.paipeng.idcard.util;
 
 import com.paipeng.idcard.entity.License;
+import javax0.license3j.Feature;
 import javax0.license3j.crypto.LicenseKeyPair;
 import javax0.license3j.io.IOFormat;
 import javax0.license3j.io.KeyPairReader;
+import javax0.license3j.io.KeyPairWriter;
+import javax0.license3j.io.LicenseWriter;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import javax.crypto.BadPaddingException;
+import javax.crypto.IllegalBlockSizeException;
+import javax.crypto.NoSuchPaddingException;
 import java.io.File;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.Optional;
+import java.io.IOException;
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
+import java.util.Base64;
 
 public class LicenseUtil {
     private final static Logger logger = LogManager.getLogger(LicenseUtil.class.getSimpleName());
@@ -35,7 +42,6 @@ public class LicenseUtil {
 
         // load public key
     }
-
 
 
     private void loadPrivateKey(String keyFile) {
@@ -77,7 +83,90 @@ public class LicenseUtil {
     }
 
 
-    public License genLicense(License license) {
+    public License genLicense(License license) throws NoSuchPaddingException, IllegalBlockSizeException, NoSuchAlgorithmException, BadPaddingException, InvalidKeyException {
+        logger.info("genLicense: " + license.getOwner());
+        javax0.license3j.License license3j = new javax0.license3j.License();
+
+        for (String featureString : license.getFeatureStrings()) {
+            Feature feature = Feature.Create.from(featureString);
+            license3j.add(feature);
+        }
+
+        // sign
+        license3j.sign(keyPair.getPair().getPrivate(), "SHA-512");
+
+        String base64Signature = Base64.getEncoder().encodeToString(license3j.getSignature());
+        logger.info("signature: " + base64Signature);
+        license.setSignature(base64Signature);
+
+        // verify
+        verify(license3j);
+
+        // save to file/gen
+        String filePath = saveLicense(license3j, "/Users/paipeng/Documents/" + license.getOwner() + ".license");
+        license.setFilePath(filePath);
         return license;
+    }
+
+
+    private void generate(String privateKeyFile, String publicKeyFile) {
+        final String algorithm = "RSA";
+        final String sizeString = "2048";
+        final IOFormat format = IOFormat.BINARY;
+        final int size;
+        try {
+            size = Integer.parseInt(sizeString);
+        } catch (NumberFormatException e) {
+            logger.error("Option size has to be a positive decimal integer value. " +
+                    sizeString + " does not qualify as such.");
+            return;
+        }
+        generateKeys(algorithm, size);
+        try (final KeyPairWriter writer = new KeyPairWriter(privateKeyFile, publicKeyFile)) {
+            writer.write(keyPair, format);
+            final String privateKeyPath = new File(privateKeyFile).getAbsolutePath();
+            logger.info("Private key saved to " + privateKeyPath);
+            logger.info("Public key saved to " + new File(publicKeyFile).getAbsolutePath());
+        } catch (IOException e) {
+            logger.error("An exception occurred saving the keys: " + e);
+        }
+    }
+
+    private void generateKeys(String algorithm, int size) {
+        try {
+            keyPair = LicenseKeyPair.Create.from(algorithm, size);
+        } catch (NoSuchAlgorithmException e) {
+            throw new IllegalArgumentException("Algorithm " + algorithm + " is not handled by the current version of this application.", e);
+        }
+    }
+
+    private String saveLicense(javax0.license3j.License license, String outputPath) {
+        logger.info("saveLicense: " + outputPath);
+        if (license == null) {
+            logger.error("There is no license to save.");
+            return null;
+        }
+        try {
+            final String fileName = outputPath;
+            final LicenseWriter reader = new LicenseWriter(fileName);
+            reader.write(license, IOFormat.BINARY);
+            logger.info("License was saved into the file " + new File(fileName).getAbsolutePath());
+            return fileName;
+        } catch (IOException e) {
+            logger.error("Error writing license file " + e);
+            return null;
+        }
+    }
+
+    private void verify(javax0.license3j.License license) {
+        if (keyPair == null || keyPair.getPair() == null || keyPair.getPair().getPublic() == null) {
+            logger.error("There is no public key to verify the license with.");
+            return;
+        }
+        if (license.isOK(keyPair.getPair().getPublic())) {
+            logger.info("License is properly signed.");
+        } else {
+            logger.error("License is not signed properly.");
+        }
     }
 }

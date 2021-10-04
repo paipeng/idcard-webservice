@@ -86,7 +86,8 @@ public class JWTAuthorizationFilter extends OncePerRequestFilter {
     /**
      * Authentication method in Spring flow
      *
-     * @param claims
+     * @param claims claims
+     * @param user user
      */
     private void setUpSpringAuthentication(Claims claims, User user) {
         @SuppressWarnings("unchecked")

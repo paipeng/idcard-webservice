@@ -58,4 +58,14 @@ public class LicenseController {
         }
         return license;
     }
+
+    @GetMapping(value = "/gen/{id}", produces = {"application/json;charset=UTF-8"})
+    public License genLicenseById(@NotNull @PathVariable("id") Long id, HttpServletResponse httpServletResponse) {
+        logger.info("getLicenseById: " + id);
+        License license = licneseService.genLicenseFile(id);
+        if (license == null) {
+            httpServletResponse.setStatus(HttpStatus.NOT_FOUND.value());
+        }
+        return license;
+    }
 }

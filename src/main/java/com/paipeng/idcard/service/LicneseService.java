@@ -1,15 +1,23 @@
 package com.paipeng.idcard.service;
 
+import com.paipeng.idcard.config.ApplicationConfig;
 import com.paipeng.idcard.entity.BaseEntity;
 import com.paipeng.idcard.entity.License;
 import com.paipeng.idcard.entity.User;
 import com.paipeng.idcard.repository.LicenseRepository;
+import com.paipeng.idcard.util.LicenseUtil;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import javax.crypto.BadPaddingException;
+import javax.crypto.IllegalBlockSizeException;
+import javax.crypto.NoSuchPaddingException;
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
 import java.util.List;
+import java.util.UUID;
 
 @Service
 public class LicneseService extends BaseService {
@@ -17,6 +25,9 @@ public class LicneseService extends BaseService {
 
     @Autowired
     private LicenseRepository licenseRepository;
+
+    @Autowired
+    private ApplicationConfig applicationConfig;
 
     public List<License> getLicenses() {
         logger.info("getLicenses");
@@ -33,6 +44,7 @@ public class LicneseService extends BaseService {
         User user = getUserFromSecurity();
         if (user != null) {
             license.setUser(user);
+            license.setUuid(UUID.randomUUID().toString());
             return licenseRepository.saveAndFlush(license);
         } else {
             throw new Exception("403");
@@ -59,12 +71,12 @@ public class LicneseService extends BaseService {
     public License update(Long id, License license) throws Exception {
         logger.info("update: " + id);
         License localLicense = licenseRepository.findById(id).orElse(null);
-        if (license != null) {
+        if (localLicense != null) {
             User currentUser = getUserFromSecurity();
-            if (currentUser.getId() == license.getUser().getId()) {
+            if (currentUser.getId().equals(license.getUser().getId())) {
                 // update
                 localLicense.setOwner(license.getOwner());
-                localLicense.setAppName(license.getAppName());
+                localLicense.setApp(license.getApp());
                 localLicense.setExpire(license.getExpire());
                 localLicense.setNanogrid(license.isNanogrid());
 
@@ -77,5 +89,28 @@ public class LicneseService extends BaseService {
             logger.error("license not found -> 404");
             return null;
         }
+    }
+
+    public License genLicenseFile(Long id) {
+        logger.info("genLicenseFile: " + id);
+        License license = licenseRepository.findById(id).orElse(null);
+        if (license != null) {
+            LicenseUtil.getInstance().loadKeys(applicationConfig.getLicensePrivateKeyFile(), applicationConfig.getLicensePublicKeyFile());
+            try {
+                license = LicenseUtil.getInstance().genLicense(license);
+                return licenseRepository.saveAndFlush(license);
+            } catch (NoSuchPaddingException e) {
+                e.printStackTrace();
+            } catch (IllegalBlockSizeException e) {
+                e.printStackTrace();
+            } catch (NoSuchAlgorithmException e) {
+                e.printStackTrace();
+            } catch (BadPaddingException e) {
+                e.printStackTrace();
+            } catch (InvalidKeyException e) {
+                e.printStackTrace();
+            }
+        }
+        return license;
     }
 }
