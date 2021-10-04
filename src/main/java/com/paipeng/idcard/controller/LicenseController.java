@@ -61,7 +61,7 @@ public class LicenseController {
     }
 
     @GetMapping(value = "/gen/{id}", produces = {"application/json;charset=UTF-8"})
-    public License genLicenseById(@NotNull @PathVariable("id") Long id, HttpServletResponse httpServletResponse) {
+    public License genLicenseById(@NotNull @PathVariable("id") Long id, HttpServletResponse httpServletResponse) throws Exception {
         logger.info("getLicenseById: " + id);
         License license = licneseService.genLicenseFile(id);
         if (license == null) {

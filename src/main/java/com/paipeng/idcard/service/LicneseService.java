@@ -51,6 +51,7 @@ public class LicneseService extends BaseService {
             license.setUuid(UUID.randomUUID().toString());
             return licenseRepository.saveAndFlush(license);
         } else {
+            logger.error("this licnese doesn't belong to this user");
             throw new Exception("403");
         }
 
@@ -64,6 +65,7 @@ public class LicneseService extends BaseService {
             if (currentUser.getId() == license.getUser().getId()) {
                 licenseRepository.delete(license);
             } else {
+                logger.error("this licnese doesn't belong to this user");
                 throw new Exception("403");
             }
         } else {
@@ -76,6 +78,9 @@ public class LicneseService extends BaseService {
         logger.info("update: " + id);
         License localLicense = licenseRepository.findById(id).orElse(null);
         if (localLicense != null) {
+            if (localLicense.getFilePath() != null) {
+                throw new Exception("409");
+            }
             User currentUser = getUserFromSecurity();
             if (currentUser.getId().equals(license.getUser().getId())) {
                 // update
@@ -87,6 +92,7 @@ public class LicneseService extends BaseService {
                 localLicense = licenseRepository.saveAndFlush(localLicense);
                 return localLicense;
             } else {
+                logger.error("this licnese doesn't belong to this user");
                 throw new Exception("403");
             }
         } else {
@@ -95,24 +101,30 @@ public class LicneseService extends BaseService {
         }
     }
 
-    public License genLicenseFile(Long id) {
+    public License genLicenseFile(Long id) throws Exception {
         logger.info("genLicenseFile: " + id);
         License license = licenseRepository.findById(id).orElse(null);
         if (license != null) {
-            LicenseUtil.getInstance().loadKeys(applicationConfig.getLicensePrivateKeyFile(), applicationConfig.getLicensePublicKeyFile());
-            try {
-                license = LicenseUtil.getInstance().genLicense(license);
-                return licenseRepository.saveAndFlush(license);
-            } catch (NoSuchPaddingException e) {
-                e.printStackTrace();
-            } catch (IllegalBlockSizeException e) {
-                e.printStackTrace();
-            } catch (NoSuchAlgorithmException e) {
-                e.printStackTrace();
-            } catch (BadPaddingException e) {
-                e.printStackTrace();
-            } catch (InvalidKeyException e) {
-                e.printStackTrace();
+            User currentUser = getUserFromSecurity();
+            if (currentUser.getId().equals(license.getUser().getId())) {
+                LicenseUtil.getInstance().loadKeys(applicationConfig.getLicensePrivateKeyFile(), applicationConfig.getLicensePublicKeyFile());
+                try {
+                    license = LicenseUtil.getInstance().genLicense(license);
+                    return licenseRepository.saveAndFlush(license);
+                } catch (NoSuchPaddingException e) {
+                    e.printStackTrace();
+                } catch (IllegalBlockSizeException e) {
+                    e.printStackTrace();
+                } catch (NoSuchAlgorithmException e) {
+                    e.printStackTrace();
+                } catch (BadPaddingException e) {
+                    e.printStackTrace();
+                } catch (InvalidKeyException e) {
+                    e.printStackTrace();
+                }
+            } else {
+                logger.error("this licnese doesn't belong to this user");
+                throw new Exception("403");
             }
         }
         return license;
@@ -122,15 +134,21 @@ public class LicneseService extends BaseService {
         logger.info("downloadLicenseFileById: " + id);
         License license = licenseRepository.findById(id).orElse(null);
         if (license != null) {
-            try {
-                String path = applicationConfig.getLicenseOutputFilepath() + "/" + license.getFilePath();
-                logger.info("downloadLicenseFilePath: " + path);
-                File file = new File(path);
-                InputStream is = new FileInputStream(file);
-                return IOUtils.toByteArray(is);
-            } catch (IOException e) {
-                logger.error(e.getMessage());
-                throw new Exception("404");
+            User currentUser = getUserFromSecurity();
+            if (currentUser.getId().equals(license.getUser().getId())) {
+                try {
+                    String path = applicationConfig.getLicenseOutputFilepath() + "/" + license.getFilePath();
+                    logger.info("downloadLicenseFilePath: " + path);
+                    File file = new File(path);
+                    InputStream is = new FileInputStream(file);
+                    return IOUtils.toByteArray(is);
+                } catch (IOException e) {
+                    logger.error(e.getMessage());
+                    throw new Exception("404");
+                }
+            } else {
+                logger.error("this licnese doesn't belong to this user");
+                throw new Exception("403");
             }
         }
         return null;
