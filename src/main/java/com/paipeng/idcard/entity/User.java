@@ -26,6 +26,10 @@ public class User extends BaseEntity{
     @Column(name = "last_name", nullable = false, length = 20)
     private String lastName;
 
+
+    @Column(name = "token", nullable = true, length = 256)
+    private String token;
+
     @JsonBackReference("license-user")
     @OneToMany(cascade = {CascadeType.REFRESH}, fetch = FetchType.LAZY, mappedBy = "user")
     @LazyCollection(value = LazyCollectionOption.EXTRA)
@@ -71,5 +75,13 @@ public class User extends BaseEntity{
 
     public void setLicenses(List<License> licenses) {
         this.licenses = licenses;
+    }
+
+    public String getToken() {
+        return token;
+    }
+
+    public void setToken(String token) {
+        this.token = token;
     }
 }

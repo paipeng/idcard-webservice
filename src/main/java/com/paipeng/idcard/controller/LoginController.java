@@ -43,7 +43,10 @@ public class LoginController {
                 PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
                 if(passwordEncoder.matches(user.getPassword(),foundUser.getPassword())) {
                     String token = getJWTToken(user.getEmail());
-                    return "jwt: " + token;
+                    logger.info("token: " + token.length());
+                    foundUser.setToken(token);
+                    userRepository.saveAndFlush(foundUser);
+                    return "jwt: " + "Bearer " + token;
                 } else {
                     return "password invalid";
                 }
@@ -55,6 +58,7 @@ public class LoginController {
         }
     }
 
+    @SuppressWarnings("undeprecated")
     private String getJWTToken(String username) {
         List<GrantedAuthority> grantedAuthorities = AuthorityUtils
                 .commaSeparatedStringToAuthorityList("ROLE_USER");
@@ -70,6 +74,6 @@ public class LoginController {
                 .setExpiration(new Date(System.currentTimeMillis() + 600000))
                 .signWith(SignatureAlgorithm.HS512,
                         JWTAuthorizationFilter.SECRET.getBytes()).compact();
-        return "Bearer " + token;
+        return token;
     }
 }
