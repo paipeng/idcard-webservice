@@ -21,7 +21,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
-public class UserService {
+public class UserService extends BaseService {
     private final static Logger logger = LogManager.getLogger(UserService.class.getSimpleName());
     @Autowired
     private UserRepository userRepository;

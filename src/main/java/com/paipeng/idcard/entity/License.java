@@ -1,5 +1,6 @@
 package com.paipeng.idcard.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import org.hibernate.annotations.LazyToOne;
 import org.hibernate.annotations.LazyToOneOption;
 
@@ -58,6 +59,7 @@ public class License extends BaseEntity {
         this.nanogrid = nanogrid;
     }
 
+    @JsonIgnore
     public User getUser() {
         return user;
     }

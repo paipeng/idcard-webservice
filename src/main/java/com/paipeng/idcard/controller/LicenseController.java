@@ -7,11 +7,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletResponse;
 import java.util.List;
@@ -39,5 +35,11 @@ public class LicenseController {
             httpServletResponse.setStatus(HttpStatus.NOT_FOUND.value());
         }
         return license;
+    }
+
+    @PostMapping(value = "", produces = {"application/json;charset=UTF-8"})
+    public License save(@RequestBody License license, HttpServletResponse httpServletResponse) throws Exception {
+        httpServletResponse.setStatus(HttpStatus.CREATED.value());
+        return licneseService.save(license);
     }
 }
