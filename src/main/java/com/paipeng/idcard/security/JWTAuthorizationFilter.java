@@ -38,9 +38,14 @@ public class JWTAuthorizationFilter extends OncePerRequestFilter {
         try {
             if (checkJWTToken(request, response)) {
                 logger.trace("jwt token found");
-                Claims claims = validateToken(request);
+                String jwtToken = request.getHeader(HEADER).replace(PREFIX, "");
+                logger.trace("jwtToken: " + jwtToken);
+
+                User user = userRepository.findByToken(jwtToken);
+
+                Claims claims = validateToken(jwtToken, user);
                 if (claims != null && claims.get("authorities") != null) {
-                    setUpSpringAuthentication(claims);
+                    setUpSpringAuthentication(claims, user);
                 } else {
                     logger.error("validateToken failed");
                     SecurityContextHolder.clearContext();
@@ -57,12 +62,8 @@ public class JWTAuthorizationFilter extends OncePerRequestFilter {
         }
     }
 
-    private Claims validateToken(HttpServletRequest request) {
+    private Claims validateToken(String jwtToken, User user) {
         logger.trace("validateToken");
-        String jwtToken = request.getHeader(HEADER).replace(PREFIX, "");
-        logger.trace("jwtToken: " + jwtToken);
-
-        User user = userRepository.findByToken(jwtToken);
         if (user != null) {
             logger.trace("local SECRET: " + user.getToken());
             Claims claims = Jwts.parser().setSigningKey(SECRET).parseClaimsJws(jwtToken).getBody();
@@ -78,14 +79,14 @@ public class JWTAuthorizationFilter extends OncePerRequestFilter {
      *
      * @param claims
      */
-    private void setUpSpringAuthentication(Claims claims) {
+    private void setUpSpringAuthentication(Claims claims, User user) {
         @SuppressWarnings("unchecked")
         List<String> authorities = (List) claims.get("authorities");
 
         UsernamePasswordAuthenticationToken auth = new UsernamePasswordAuthenticationToken(claims.getSubject(), null,
                 authorities.stream().map(SimpleGrantedAuthority::new).collect(Collectors.toList()));
+        auth.setDetails(user);
         SecurityContextHolder.getContext().setAuthentication(auth);
-
     }
 
     private boolean checkJWTToken(HttpServletRequest request, HttpServletResponse res) {

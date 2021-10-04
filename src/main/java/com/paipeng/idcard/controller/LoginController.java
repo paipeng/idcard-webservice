@@ -1,85 +1,33 @@
 package com.paipeng.idcard.controller;
 
 import com.paipeng.idcard.entity.User;
-import com.paipeng.idcard.repository.UserRepository;
-import com.paipeng.idcard.security.JWTAuthorizationFilter;
+import com.paipeng.idcard.service.UserService;
 import com.sun.istack.NotNull;
-import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.SignatureAlgorithm;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.authority.AuthorityUtils;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RestController;
-
-import java.security.SecureRandom;
-import java.util.Date;
-import java.util.List;
-import java.util.stream.Collectors;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 public class LoginController {
     private final static Logger logger = LogManager.getLogger(LoginController.class.getSimpleName());
     @Autowired
-    private UserRepository userRepository;
+    private UserService userService;
 
     @PostMapping(value = "/login", produces = {"application/json;charset=UTF-8"})
     public String login(@NotNull @RequestBody User user) {
-        logger.info("my login: " + user.getEmail());
-        logger.info("my password: " + user.getPassword());
-
-        if (user.getPassword() != null) {
-            //BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
-            //String encodedPassword = passwordEncoder.encode(user.getPassword());
-            //logger.trace("encodedPassword: " + encodedPassword);
-            User foundUser = userRepository.findByEmail(user.getEmail());
-
-
-            if (foundUser != null) {
-                PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
-                if(passwordEncoder.matches(user.getPassword(),foundUser.getPassword())) {
-                    String token = getJWTToken(user.getEmail());
-                    logger.info("token: " + token.length());
-                    foundUser.setToken(token);
-                    userRepository.saveAndFlush(foundUser);
-                    return "jwt: " + "Bearer " + token;
-                } else {
-                    return "password invalid";
-                }
-            } else {
-                return "user not found";
-            }
+        User loginUser = userService.login(user);
+        if (loginUser != null) {
+            return "jwt: " + "Bearer " + loginUser.getToken();
         } else {
-            return "password invalid";
+            return "login failed";
         }
     }
 
-    @SuppressWarnings("undeprecated")
-    private String getJWTToken(String username) {
-        //SecureRandom random = new SecureRandom();
-        //byte[] bytes = new byte[64]; // 36 bytes * 8 = 288 bits, a little bit more than
-        // the 256 required bits
-        //random.nextBytes(bytes);
-
-        List<GrantedAuthority> grantedAuthorities = AuthorityUtils
-                .commaSeparatedStringToAuthorityList("ROLE_USER");
-        String token = Jwts
-                .builder()
-                .setId("softtekJWT")
-                .setSubject(username)
-                .claim("authorities",
-                        grantedAuthorities.stream()
-                                .map(GrantedAuthority::getAuthority)
-                                .collect(Collectors.toList()))
-                .setIssuedAt(new Date(System.currentTimeMillis()))
-                .setExpiration(new Date(System.currentTimeMillis() + 600000))
-                .signWith(SignatureAlgorithm.HS512,
-                        JWTAuthorizationFilter.SECRET).compact();
-        return token;
+    @GetMapping("/logout2")
+    public String logout() {
+        logger.info("logout2");
+        userService.logout();
+        return "";
     }
 }
