@@ -85,7 +85,7 @@ public class LicneseService extends BaseService {
                 throw new Exception("409");
             }
             User currentUser = getUserFromSecurity();
-            if (currentUser.getId().equals(license.getUser().getId())) {
+            if (currentUser.getId().equals(localLicense.getUser().getId())) {
                 // update
                 localLicense.setOwner(license.getOwner());
                 localLicense.setApp(license.getApp());
