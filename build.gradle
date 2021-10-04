@@ -33,6 +33,9 @@ dependencies {
 			'io.jsonwebtoken:jjwt-jackson:0.11.2' // or 'io.jsonwebtoken:jjwt-gson:0.11.2' for gson
 
 
+	// https://mvnrepository.com/artifact/commons-io/commons-io
+	implementation group: 'commons-io', name: 'commons-io', version: '2.11.0'
+
 	// https://mvnrepository.com/artifact/com.javax0.license3j/license3j
 	implementation group: 'com.javax0.license3j', name: 'license3j', version: '3.1.6'
 

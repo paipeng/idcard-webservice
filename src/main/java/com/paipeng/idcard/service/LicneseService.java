@@ -1,11 +1,11 @@
 package com.paipeng.idcard.service;
 
 import com.paipeng.idcard.config.ApplicationConfig;
-import com.paipeng.idcard.entity.BaseEntity;
 import com.paipeng.idcard.entity.License;
 import com.paipeng.idcard.entity.User;
 import com.paipeng.idcard.repository.LicenseRepository;
 import com.paipeng.idcard.util.LicenseUtil;
+import org.apache.commons.io.IOUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,6 +14,10 @@ import org.springframework.stereotype.Service;
 import javax.crypto.BadPaddingException;
 import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.NoSuchPaddingException;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.util.List;
@@ -112,5 +116,23 @@ public class LicneseService extends BaseService {
             }
         }
         return license;
+    }
+
+    public byte[] downloadLicenseFileById(Long id) throws Exception {
+        logger.info("downloadLicenseFileById: " + id);
+        License license = licenseRepository.findById(id).orElse(null);
+        if (license != null) {
+            try {
+                String path = applicationConfig.getLicenseOutputFilepath() + "/" + license.getFilePath();
+                logger.info("downloadLicenseFilePath: " + path);
+                File file = new File(path);
+                InputStream is = new FileInputStream(file);
+                return IOUtils.toByteArray(is);
+            } catch (IOException e) {
+                logger.error(e.getMessage());
+                throw new Exception("404");
+            }
+        }
+        return null;
     }
 }

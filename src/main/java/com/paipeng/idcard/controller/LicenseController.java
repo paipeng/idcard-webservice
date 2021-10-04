@@ -7,6 +7,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletResponse;
@@ -68,4 +69,12 @@ public class LicenseController {
         }
         return license;
     }
+
+    @GetMapping(value = "/download/{id}", produces = MediaType.APPLICATION_OCTET_STREAM_VALUE)
+    public @ResponseBody byte[] downloadLicenseFileById(@NotNull @PathVariable("id") Long id) throws Exception {
+        logger.info("downloadLicenseFileById: " + id);
+        return licneseService.downloadLicenseFileById(id);
+    }
+
+
 }
