@@ -22,6 +22,10 @@ public class License extends BaseEntity {
     @Column(name = "nanogrid", columnDefinition = "bit default 0 ", nullable = false)
     private boolean nanogrid;
 
+
+    @Column(name = "file_path", nullable = false, length = 128)
+    private String filePath;
+
     @ManyToOne(cascade = {CascadeType.REFRESH}, fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", referencedColumnName = "id", nullable = false)
     @LazyToOne(value = LazyToOneOption.FALSE)
@@ -66,5 +70,14 @@ public class License extends BaseEntity {
 
     public void setUser(User user) {
         this.user = user;
+    }
+
+    @JsonIgnore
+    public String getFilePath() {
+        return filePath;
+    }
+
+    public void setFilePath(String filePath) {
+        this.filePath = filePath;
     }
 }
