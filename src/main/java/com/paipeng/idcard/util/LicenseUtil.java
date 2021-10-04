@@ -103,8 +103,11 @@ public class LicenseUtil {
         verify(license3j);
 
         // save to file/gen
-        String filePath = saveLicense(license3j, "/Users/paipeng/Documents/" + license.getOwner() + ".license");
-        license.setFilePath(filePath);
+        license.setFilePath(license.getUuid() + ".license");
+        String filePath = saveLicense(license3j, "/Users/paipeng/Documents/" + license.getFilePath());
+        if (filePath == null) {
+            license.setFilePath(null);
+        }
         return license;
     }
 
