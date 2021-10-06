@@ -33,9 +33,15 @@ public class LicneseService extends BaseService {
     @Autowired
     private ApplicationConfig applicationConfig;
 
-    public List<License> getLicenses() {
+    public List<License> getLicenses() throws Exception {
         logger.info("getLicenses");
-        return licenseRepository.findAll();
+        User user = getUserFromSecurity();
+        if (user != null) {
+            return licenseRepository.findAllByUser(user);
+        } else {
+            logger.error("no user found");
+            throw new Exception("403");
+        }
     }
 
     public License getLicenseById(Long id) {

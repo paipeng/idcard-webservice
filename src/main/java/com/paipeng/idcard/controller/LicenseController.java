@@ -22,7 +22,7 @@ public class LicenseController {
     private LicneseService licneseService;
 
     @GetMapping(value = "", produces = {"application/json;charset=UTF-8"})
-    public List<License> getAll() {
+    public List<License> getAll() throws Exception {
         logger.info("getAll");
         return licneseService.getLicenses();
     }
