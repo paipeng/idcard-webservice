@@ -1,6 +1,7 @@
 package com.paipeng.idcard.controller;
 
 import com.paipeng.idcard.entity.License;
+import com.paipeng.idcard.model.LicenseBase64;
 import com.paipeng.idcard.service.LicneseService;
 import com.sun.istack.NotNull;
 import org.apache.logging.log4j.LogManager;
@@ -76,5 +77,11 @@ public class LicenseController {
         return licneseService.downloadLicenseFileById(id);
     }
 
+
+    @GetMapping(value = "/down2/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
+    public LicenseBase64 downloadLicenseFile2ById(@NotNull @PathVariable("id") Long id) throws Exception {
+        logger.info("downloadLicenseFileById: " + id);
+        return licneseService.downloadLicenseFile2ById(id);
+    }
 
 }

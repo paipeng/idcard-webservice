@@ -3,6 +3,7 @@ package com.paipeng.idcard.service;
 import com.paipeng.idcard.config.ApplicationConfig;
 import com.paipeng.idcard.entity.License;
 import com.paipeng.idcard.entity.User;
+import com.paipeng.idcard.model.LicenseBase64;
 import com.paipeng.idcard.repository.LicenseRepository;
 import com.paipeng.idcard.util.LicenseUtil;
 import org.apache.commons.io.IOUtils;
@@ -20,6 +21,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
+import java.util.Base64;
 import java.util.List;
 import java.util.UUID;
 
@@ -146,6 +148,35 @@ public class LicneseService extends BaseService {
                     File file = new File(path);
                     InputStream is = new FileInputStream(file);
                     return IOUtils.toByteArray(is);
+                } catch (IOException e) {
+                    logger.error(e.getMessage());
+                    throw new Exception("404");
+                }
+            } else {
+                logger.error("this licnese doesn't belong to this user");
+                throw new Exception("403");
+            }
+        } else {
+            logger.error("license not found by given id");
+        }
+        throw new Exception("404");
+    }
+
+
+    public LicenseBase64 downloadLicenseFile2ById(Long id) throws Exception {
+        logger.info("downloadLicenseFileById: " + id);
+        License license = licenseRepository.findById(id).orElse(null);
+        if (license != null) {
+            User currentUser = getUserFromSecurity();
+            if (currentUser.getId().equals(license.getUser().getId())) {
+                try {
+                    String path = System.getenv("PROJ_HOME") + "/" + applicationConfig.getLicenseOutputFilepath() + "/" + license.getFilePath();
+                    logger.info("downloadLicenseFilePath: " + path);
+                    File file = new File(path);
+                    InputStream is = new FileInputStream(file);
+                    byte[] bytes =  IOUtils.toByteArray(is);
+                    LicenseBase64 licenseBase64 = new LicenseBase64();
+                    licenseBase64.setBase64(Base64.getEncoder().encodeToString(bytes));
                 } catch (IOException e) {
                     logger.error(e.getMessage());
                     throw new Exception("404");
