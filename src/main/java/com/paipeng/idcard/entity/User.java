@@ -27,7 +27,7 @@ public class User extends BaseEntity{
     private String lastName;
 
 
-    @Column(name = "token", nullable = true, length = 256)
+    @Column(name = "token", length = 512)
     private String token;
 
     @JsonBackReference("license-user")

@@ -65,9 +65,15 @@ public class JWTAuthorizationFilter extends OncePerRequestFilter {
             return;
         } catch (Exception e) {
             logger.error("doFilterInternal exception2: " + e.getMessage());
-            if (e.getMessage().endsWith("java.lang.Exception: 403")) {
+            if (e.getMessage().endsWith("java.lang.Exception: 400")) {
+                response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+                response.sendError(HttpServletResponse.SC_BAD_REQUEST, e.getMessage());
+            } else if (e.getMessage().endsWith("java.lang.Exception: 403")) {
                 response.setStatus(HttpServletResponse.SC_FORBIDDEN);
                 response.sendError(HttpServletResponse.SC_FORBIDDEN, e.getMessage());
+            } else if (e.getMessage().endsWith("java.lang.Exception: 401")) {
+                response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                response.sendError(HttpServletResponse.SC_UNAUTHORIZED, e.getMessage());
             } else if (e.getMessage().endsWith("java.lang.Exception: 404")) {
                 response.setStatus(HttpServletResponse.SC_NOT_FOUND);
                 response.sendError(HttpServletResponse.SC_NOT_FOUND, e.getMessage());
@@ -76,6 +82,8 @@ public class JWTAuthorizationFilter extends OncePerRequestFilter {
                 response.sendError(HttpServletResponse.SC_CONFLICT, e.getMessage());
             } else {
                 logger.error("exception not handle");
+                response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+                response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e.getMessage());
             }
         }
     }

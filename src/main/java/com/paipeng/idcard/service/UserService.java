@@ -30,7 +30,7 @@ public class UserService extends BaseService {
     @Autowired
     private ApplicationConfig applicationConfig;
 
-    public User login(User user) {
+    public User login(User user) throws Exception {
         logger.info("my login: " + user.getEmail());
         logger.info("my password: " + user.getPassword());
 
@@ -47,12 +47,15 @@ public class UserService extends BaseService {
                     logger.info("token: " + token.length());
                     foundUser.setToken(token);
                     foundUser = userRepository.saveAndFlush(foundUser);
+                    return foundUser;
+                } else {
+                    throw new Exception("401");
                 }
+            } else {
+                throw new Exception("401");
             }
-            return foundUser;
-        } else {
-            return null;
         }
+        throw new Exception("401");
     }
 
     @SuppressWarnings("undeprecated")
@@ -92,6 +95,27 @@ public class UserService extends BaseService {
                 user.setToken(null);
                 userRepository.saveAndFlush(user);
             }
+        }
+    }
+
+    public User register(User user) throws Exception {
+        logger.info("register: " + user.getEmail());
+        logger.info("my password: " + user.getPassword());
+
+        if (user.getEmail() != null && user.getPassword() != null) {
+            User foundUser = userRepository.findByEmail(user.getEmail());
+            if (foundUser != null) {
+                throw new Exception("409");
+            } else {
+                BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
+                String encodedPassword = passwordEncoder.encode(user.getPassword());
+                logger.trace("encodedPassword: " + encodedPassword);
+                user.setPassword(encodedPassword);
+                user = userRepository.saveAndFlush(user);
+                return user;
+            }
+        } else {
+            throw new Exception("400");
         }
     }
 }

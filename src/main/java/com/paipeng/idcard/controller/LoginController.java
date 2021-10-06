@@ -16,13 +16,8 @@ public class LoginController {
     private UserService userService;
 
     @PostMapping(value = "/login", produces = {"application/json;charset=UTF-8"})
-    public String login(@NotNull @RequestBody User user) {
-        User loginUser = userService.login(user);
-        if (loginUser != null) {
-            return "jwt: " + "Bearer " + loginUser.getToken();
-        } else {
-            return "login failed";
-        }
+    public User login(@NotNull @RequestBody User user) throws Exception {
+        return userService.login(user);
     }
 
 
@@ -34,4 +29,11 @@ public class LoginController {
         //response.setStatus(HttpStatus.NO_CONTENT.value());
         //return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
+
+
+    @PostMapping(value = "/register", produces = {"application/json;charset=UTF-8"})
+    public User register(@NotNull @RequestBody User user) throws Exception {
+        return userService.register(user);
+    }
+
 }

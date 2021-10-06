@@ -151,7 +151,9 @@ public class LicneseService extends BaseService {
                 logger.error("this licnese doesn't belong to this user");
                 throw new Exception("403");
             }
+        } else {
+            logger.error("license not found by given id");
         }
-        return null;
+        throw new Exception("404");
     }
 }
