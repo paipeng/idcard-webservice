@@ -41,6 +41,7 @@ public class VersionController {
         versionMap.put("sha256", getSha256String());
         versionMap.put("tomcat", System.getProperty("catalina.base") + "/webapps/");
         versionMap.put("createData", versionConfig.getCreateData());
+        versionMap.put("currentDir", System.getenv("PROJ_HOME"));
 
         return versionMap;
     }

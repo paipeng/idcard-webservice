@@ -23,6 +23,7 @@ public class LicenseUtil {
     private final static Logger logger = LogManager.getLogger(LicenseUtil.class.getSimpleName());
     private static LicenseUtil licenseUtil;
     private LicenseKeyPair keyPair;
+    private String outputFilePath;
 
     public LicenseUtil() {
 
@@ -68,6 +69,10 @@ public class LicenseUtil {
         }
     }
 
+    public void setOutputFilePath(String outputFilePath) {
+        this.outputFilePath = outputFilePath;
+    }
+
     private LicenseKeyPair merge(LicenseKeyPair oldKp, LicenseKeyPair newKp) {
         if (oldKp == null) {
             return newKp;
@@ -104,7 +109,8 @@ public class LicenseUtil {
 
         // save to file/gen
         license.setFilePath(license.getUuid() + ".license");
-        String filePath = saveLicense(license3j, "/Users/paipeng/Documents/" + license.getFilePath());
+        String filePath = saveLicense(license3j, System.getenv("PROJ_HOME") + "/" + outputFilePath + "/" + license.getFilePath());
+        logger.info("saveLicense filePath: " + filePath);
         if (filePath == null) {
             license.setFilePath(null);
         }

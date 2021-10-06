@@ -116,7 +116,10 @@ public class LicneseService extends BaseService {
         if (license != null) {
             User currentUser = getUserFromSecurity();
             if (currentUser.getId().equals(license.getUser().getId())) {
-                LicenseUtil.getInstance().loadKeys(applicationConfig.getLicensePrivateKeyFile(), applicationConfig.getLicensePublicKeyFile());
+                LicenseUtil.getInstance().loadKeys(
+                        System.getenv("PROJ_HOME") + "/" + applicationConfig.getLicensePrivateKeyFile(),
+                        System.getenv("PROJ_HOME") + "/" + applicationConfig.getLicensePublicKeyFile());
+                LicenseUtil.getInstance().setOutputFilePath(applicationConfig.getLicenseOutputFilepath());
                 try {
                     license = LicenseUtil.getInstance().genLicense(license);
                     return licenseRepository.saveAndFlush(license);
@@ -138,7 +141,7 @@ public class LicneseService extends BaseService {
             User currentUser = getUserFromSecurity();
             if (currentUser.getId().equals(license.getUser().getId())) {
                 try {
-                    String path = applicationConfig.getLicenseOutputFilepath() + "/" + license.getFilePath();
+                    String path = System.getenv("PROJ_HOME") + "/" + applicationConfig.getLicenseOutputFilepath() + "/" + license.getFilePath();
                     logger.info("downloadLicenseFilePath: " + path);
                     File file = new File(path);
                     InputStream is = new FileInputStream(file);
