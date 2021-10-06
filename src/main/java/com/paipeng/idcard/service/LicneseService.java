@@ -190,4 +190,21 @@ public class LicneseService extends BaseService {
         }
         throw new Exception("404");
     }
+
+    public License verifyLicense(LicenseBase64 licenseBase64) throws Exception {
+        logger.info("verifyLicense");
+        LicenseUtil.getInstance().loadKeys(
+                System.getenv("PROJ_HOME") + "/" + applicationConfig.getLicensePrivateKeyFile(),
+                System.getenv("PROJ_HOME") + "/" + applicationConfig.getLicensePublicKeyFile());
+        LicenseUtil.getInstance().setOutputFilePath(applicationConfig.getLicenseOutputFilepath());
+        try {
+            String base64 = licenseBase64.getBase64().replace("data:application/octet-stream;base64,", "");
+            byte[] bytes = Base64.getDecoder().decode(base64);
+            License license = LicenseUtil.getInstance().verifyLicense(bytes);
+            return license;
+        } catch (IOException e) {
+            logger.error(e.getMessage());
+            throw new Exception("500");
+        }
+    }
 }

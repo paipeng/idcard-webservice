@@ -84,4 +84,10 @@ public class LicenseController {
         return licneseService.downloadLicenseFile2ById(id);
     }
 
+    @PostMapping(value = "/verify", produces = MediaType.APPLICATION_JSON_VALUE)
+    public License verifyLicense(@NotNull @RequestBody LicenseBase64 licenseBase64) throws Exception {
+        logger.info("verifyLicense");
+        return licneseService.verifyLicense(licenseBase64);
+    }
+
 }

@@ -3,20 +3,18 @@ package com.paipeng.idcard.util;
 import com.paipeng.idcard.entity.License;
 import javax0.license3j.Feature;
 import javax0.license3j.crypto.LicenseKeyPair;
-import javax0.license3j.io.IOFormat;
-import javax0.license3j.io.KeyPairReader;
-import javax0.license3j.io.KeyPairWriter;
-import javax0.license3j.io.LicenseWriter;
+import javax0.license3j.io.*;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import javax.crypto.BadPaddingException;
 import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.NoSuchPaddingException;
-import java.io.File;
-import java.io.IOException;
+import java.io.*;
+import java.nio.charset.StandardCharsets;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
+import java.sql.Timestamp;
 import java.util.Base64;
 
 public class LicenseUtil {
@@ -177,5 +175,40 @@ public class LicenseUtil {
         } else {
             logger.error("License is not signed properly.");
         }
+    }
+
+    public License verifyLicense(byte[] bytes) throws IOException {
+        if (keyPair == null || keyPair.getPair() == null || keyPair.getPair().getPublic() == null) {
+            logger.error("There is no public key to verify the license with.");
+            return null;
+        }
+        InputStream inputStream = new ByteArrayInputStream(bytes);
+        LicenseReader reader = new LicenseReader(inputStream);
+        javax0.license3j.License license3j = reader.read();
+
+        final ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        final LicenseWriter licenseWriter = new LicenseWriter(baos);
+        licenseWriter.write(license3j, IOFormat.STRING);
+        String dumpString = new String(baos.toByteArray(), StandardCharsets.UTF_8);
+        logger.info("License:\n" + dumpString);
+        License license = new License();
+
+        String[] lines = dumpString.split("\n");
+        for (String line : lines) {
+            if (line.startsWith("app")) {
+                license.setApp(line.split("=")[1]);
+            } else if (line.startsWith("expire")) {
+                license.setExpire(Timestamp.valueOf(line.split("=")[1]));
+            } else if (line.startsWith("licenseSignature")) {
+                license.setSignature(line.split("=")[1]);
+            } else if (line.startsWith("nanogrid")) {
+                license.setNanogrid(line.split("=")[1].equals("1"));
+            } else if (line.startsWith("owner")) {
+                license.setOwner(line.split("=")[1]);
+            } else if (line.startsWith("uuid")) {
+                license.setUuid(line.split("=")[1]);
+            }
+        }
+        return license;
     }
 }
