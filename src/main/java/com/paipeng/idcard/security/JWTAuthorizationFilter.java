@@ -104,11 +104,11 @@ public class JWTAuthorizationFilter extends OncePerRequestFilter {
      * Authentication method in Spring flow
      *
      * @param claims claims
-     * @param user user
+     * @param user   user
      */
     private void setUpSpringAuthentication(Claims claims, User user) {
         @SuppressWarnings("unchecked")
-        List<String> authorities = (List) claims.get("authorities");
+        List<String> authorities = (List<String>) claims.get("authorities");
 
         UsernamePasswordAuthenticationToken auth = new UsernamePasswordAuthenticationToken(claims.getSubject(), null,
                 authorities.stream().map(SimpleGrantedAuthority::new).collect(Collectors.toList()));
