@@ -89,13 +89,10 @@ public class JWTAuthorizationFilter extends OncePerRequestFilter {
     }
 
     private Claims validateToken(String jwtToken, User user) {
-        logger.trace("validateToken");
+        logger.info("validateToken");
         if (user != null) {
-            logger.trace("local SECRET: " + user.getToken());
-            Claims claims = Jwts.parser().setSigningKey(applicationConfig.getSecurityJwtSecret()).parseClaimsJws(jwtToken).getBody();
-            if (claims != null) {
-                return claims;
-            }
+            logger.info("local SECRET: " + user.getToken());
+            return Jwts.parser().setSigningKey(applicationConfig.getSecurityJwtSecret()).parseClaimsJws(jwtToken).getBody();
         }
         return null;
     }
