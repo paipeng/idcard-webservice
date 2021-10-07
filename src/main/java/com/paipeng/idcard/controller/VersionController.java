@@ -19,10 +19,7 @@ import java.util.Map;
 
 @RestController
 public class VersionController {
-    private Logger log;
-
-    @Autowired
-    private ApplicationConfig applicationConfig;
+    private final Logger log;
 
     @Autowired
     private VersionConfig versionConfig;
@@ -32,14 +29,14 @@ public class VersionController {
     }
 
     @GetMapping("/version")
-    public Map version() {
+    public Map<String, String> version() {
         log.trace("version");
-        Map versionMap = new HashMap();
+        Map<String, String> versionMap = new HashMap<>();
         versionMap.put("name", versionConfig.getName());
         versionMap.put("version", versionConfig.getVersion());
         versionMap.put("time", stampToDate(Calendar.getInstance().getTimeInMillis()));
         versionMap.put("sha256", getSha256String());
-        versionMap.put("tomcat", System.getProperty("catalina.base") + "/webapps/");
+        //versionMap.put("tomcat", System.getProperty("catalina.base") + "/webapps/");
         versionMap.put("createData", versionConfig.getCreateData());
         versionMap.put("currentDir", System.getenv("PROJ_HOME"));
 
@@ -59,7 +56,7 @@ public class VersionController {
         InputStream in;
 
         try {
-            Process pro = Runtime.getRuntime().exec(new String[]{"/bin/sh", "-c", "sha256sum " + System.getProperty("catalina.base")});
+            Process pro = Runtime.getRuntime().exec(new String[]{"/bin/sh", "-c", "sha256sum " + System.getenv("PROJ_HOME") + "/libs/idcard.jar"});
             pro.waitFor();
             in = pro.getInputStream();
             BufferedReader read = new BufferedReader(new InputStreamReader(in));
