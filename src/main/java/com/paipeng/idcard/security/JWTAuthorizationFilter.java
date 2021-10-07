@@ -15,7 +15,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import javax.servlet.FilterChain;
-import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
@@ -36,13 +35,14 @@ public class JWTAuthorizationFilter extends OncePerRequestFilter {
     private UserRepository userRepository;
 
     @Override
-    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain chain) throws ServletException, IOException {
-        logger.trace("doFilterInternal");
+    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain chain) throws IOException {
+        logger.info("doFilterInternal " + request.getRemoteHost() + " " + request.getMethod() + " " + request.getRequestURI());
+
         try {
             if (checkJWTToken(request, response)) {
-                logger.trace("jwt token found");
+                logger.info("jwt token found");
                 String jwtToken = request.getHeader(HEADER).replace(PREFIX, "");
-                logger.trace("jwtToken: " + jwtToken);
+                logger.info("jwtToken: " + jwtToken);
 
                 User user = userRepository.findByToken(jwtToken);
 
@@ -58,13 +58,16 @@ public class JWTAuthorizationFilter extends OncePerRequestFilter {
                 SecurityContextHolder.clearContext();
             }
             chain.doFilter(request, response);
-        } catch (ExpiredJwtException | UnsupportedJwtException | MalformedJwtException e) {
-            logger.error("doFilterInternal exception: " + e.getMessage());
+        } catch (ExpiredJwtException e) {
+            logger.error("doFilterInternal ExpiredJwtException: " + e.getMessage());
             response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-            ((HttpServletResponse) response).sendError(HttpServletResponse.SC_UNAUTHORIZED, e.getMessage());
-            return;
+            //response.sendError(HttpServletResponse.SC_BAD_REQUEST, e.getMessage());
+        } catch (UnsupportedJwtException | MalformedJwtException e) {
+            logger.error("doFilterInternal exception local: " + e.getMessage());
+            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+            //response.sendError(HttpServletResponse.SC_UNAUTHORIZED, e.getMessage());
         } catch (Exception e) {
-            logger.error("doFilterInternal exception2: " + e.getMessage());
+            logger.error("doFilterInternal exception21: " + e.getMessage());
             if (e.getMessage().endsWith("java.lang.Exception: 400")) {
                 response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
                 response.sendError(HttpServletResponse.SC_BAD_REQUEST, e.getMessage());
@@ -80,6 +83,10 @@ public class JWTAuthorizationFilter extends OncePerRequestFilter {
             } else if (e.getMessage().endsWith("java.lang.Exception: 409")) {
                 response.setStatus(HttpServletResponse.SC_CONFLICT);
                 response.sendError(HttpServletResponse.SC_CONFLICT, e.getMessage());
+            } else if (e.getMessage().startsWith("JWT expired")) {
+                logger.error("doFilterInternal JWT expired -> 401");
+                response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                response.sendError(HttpServletResponse.SC_UNAUTHORIZED, e.getMessage());
             } else {
                 logger.error("exception not handle");
                 response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
