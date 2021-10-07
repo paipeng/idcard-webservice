@@ -3,7 +3,6 @@ package com.paipeng.idcard.service;
 import com.paipeng.idcard.config.ApplicationConfig;
 import com.paipeng.idcard.entity.User;
 import com.paipeng.idcard.repository.UserRepository;
-import com.paipeng.idcard.security.JWTAuthorizationFilter;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import org.apache.logging.log4j.LogManager;
@@ -67,7 +66,7 @@ public class UserService extends BaseService {
 
         List<GrantedAuthority> grantedAuthorities = AuthorityUtils
                 .commaSeparatedStringToAuthorityList("ROLE_USER");
-        String token = Jwts
+        return Jwts
                 .builder()
                 .setId("softtekJWT")
                 .setSubject(username)
@@ -79,7 +78,6 @@ public class UserService extends BaseService {
                 .setExpiration(new Date(System.currentTimeMillis() + 3600000))
                 .signWith(SignatureAlgorithm.HS512,
                         applicationConfig.getSecurityJwtSecret()).compact();
-        return token;
     }
 
     public void logout() {
