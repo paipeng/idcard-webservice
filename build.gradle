@@ -8,7 +8,7 @@ plugins {
 
 def applicationName = 'IdCard CRM Restful API'
 group = 'com.paipeng'
-version = '1.0.0'
+version = '1.0.1'
 sourceCompatibility = '17'
 
 repositories {
